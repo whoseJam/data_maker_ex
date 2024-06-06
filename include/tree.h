@@ -19,6 +19,53 @@ std::vector<int> shuffledNodeId(int n) {
     return nodeId;
 }
 
+struct tree {
+public:
+    tree(int root, const std::vector<std::tuple<int, int>> edges) {
+        int n = edges.size() + 1;
+        fa.resize(n + 1);
+        lx.resize(n + 1);
+        rx.resize(n + 1);
+        dep.resize(n + 1);
+        graph.resize(n + 1);
+        for (auto& edge : edges) {
+            int x = std::get<0>(edge);
+            int y = std::get<1>(edge);
+            graph[x].push_back(y);
+            graph[y].push_back(x);
+        }
+        dfs(root, 0);
+    }
+    std::vector<int> fa;
+    std::vector<int> dep;
+    std::vector<int> seq;
+    std::vector<int> lx;
+    std::vector<int> rx;
+    std::vector<std::vector<int>> graph;
+
+    /**
+     * 从u的子树中，随机抽取n个元素
+     * @param u
+     * @param n
+    */
+    std::vector<int> subtree(int u, int n) {
+        assert(rx[u] - lx[u] + 1 <= n);
+        auto answerIndex = seq::makeUnique(n, lx[u], rx[u]);
+        std::vector<int> answer;
+        for (auto& index : answerIndex)
+            answer.push_back(seq[index]);
+        return answer;
+    }
+private:
+    void dfs(int u, int f) {
+        fa[u] = f; dep[u] = dep[f] + 1;
+        lx[u] = seq.size();
+        seq.push_back(u);
+        for (auto& v : graph[u]) dfs(v, u);
+        rx[u] = seq.size() - 1;
+    }
+};
+
 /**
  * 生成一个简单树，简单树的平均高度为O(logn)
  * @param n 树的大小
